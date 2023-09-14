@@ -3,6 +3,8 @@ import re
 import time
 from docx import Document
 
+CONFIG_FILE = "config.txt"
+
 # Function to extract data from a Word document
 def extract_word_data(docx_file):
     document = Document(docx_file)
@@ -34,12 +36,34 @@ def open_file_with_delay(file_path):
     time.sleep(1)
     os.system(f"start {file_path}")
 
+# Function to get the folder path from the user and save it to the configuration file
+def get_folder_path():
+    folder_path = input("Enter the folder path where your .docx files are located: ")
+    with open(CONFIG_FILE, "w") as config_file:
+        config_file.write(folder_path)
+    return folder_path
+
+# Function to read the folder path from the configuration file
+def read_folder_path():
+    if os.path.exists(CONFIG_FILE):
+        with open(CONFIG_FILE, "r") as config_file:
+            return config_file.read()
+    else:
+        return None
+
 # Main function to collect and consolidate data
 def main():
+    # Check if the configuration file exists
+    folder_path = read_folder_path()
+
+    if not folder_path:
+        print("Configuration file not found or folder path not configured.")
+        folder_path = get_folder_path()
+
     # Input: Provide a partial number to search for
     partial_number = input("Enter a partial number to search for: ")
 
-    folder_dir = r"D:\Code\varis_info\files"
+    folder_dir = folder_path
 
     matching_folders = []
     for folder_name in os.listdir(folder_dir):
@@ -64,7 +88,7 @@ def main():
 
         word_data = extract_word_data(docx_file)
 
-        # Path for the output text file in the same folder as the script
+        # Path for the output text file in the same directory as the script
         output_file_path = os.path.join(script_dir, f"{folder_name}.txt")
 
         # Write the collected HP numbers to the output text file
