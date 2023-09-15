@@ -1,6 +1,7 @@
 import os
 import re
 import time
+import sys
 from docx import Document
 import openpyxl
 
@@ -130,7 +131,13 @@ def main():
         print(f"No matching folders found for '{partial_number}' in Word documents.")
         return
 
-    script_dir = os.path.dirname(__file__)
+    # Determine the directory of the executable (script or .exe)
+    if getattr(sys, 'frozen', False):
+    # The script is running as a compiled executable (.exe)
+        script_dir = os.path.dirname(sys.executable)
+    else:
+    # The script is running as a regular Python script
+        script_dir = os.path.dirname(__file__)
 
     for folder_name in matching_folders:
         folder_path = os.path.join(folder_dir, folder_name)
