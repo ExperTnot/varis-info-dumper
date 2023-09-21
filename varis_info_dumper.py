@@ -62,7 +62,7 @@ def search_excel_and_extract_data(excel_file, search_value):
     extracted_data = None
 
     # Iterate through rows in Column C
-    for row in sheet.iter_rows(min_row=2, values_only=True):
+    for row_number, row in enumerate(sheet.iter_rows(min_row=2, values_only=True), start=2):
         cell_value = str(row[2])  # Column C is the third column (index 2)
 
         if search_value in cell_value:
@@ -72,10 +72,54 @@ def search_excel_and_extract_data(excel_file, search_value):
                 column_i_value = row[8]  # Column I (index 8)
 
             extracted_data = (cell_value, column_i_value)
-            break  # Stop iterating after the first match
+
+            # Debug print after finding a matching cell in Column C
+            print(f"Found '{search_value}' in cell '{cell_value}', extracted Column I value: '{column_i_value}'")
+
+            # Search for "Vater" or "Mutter" in the next row
+            next_row_number = row_number + 1  # Row number of the next row
+
+            if next_row_number <= sheet.max_row:
+                next_row = sheet.cell(row=next_row_number, column=9).value  # Column I in the next row
+
+                if next_row in ["Vater", "Mutter"]:
+                    next_row_c_value = None
+                    if len(row) > 2:  # Check if there are enough columns in the current row
+                        next_row_c_value = sheet.cell(row=next_row_number, column=3).value  # Column C in the next row
+
+                    # Add "Vater" or "Mutter" and their corresponding Column C to extracted_data
+                    extracted_data += (next_row, next_row_c_value)
+                    
+                    # Debug print after finding "Vater" or "Mutter" in the next row
+                    print(f"Found '{next_row}' in the next row, Column C: '{next_row_c_value}'")
+
+                    # Search for "Vater" or "Mutter" in the row after the next row
+                    next_next_row_number = next_row_number + 1  # Row number of the row after the next row
+
+                    if next_next_row_number <= sheet.max_row:
+                        next_next_row = sheet.cell(row=next_next_row_number, column=9).value  # Column I in the row after the next row
+
+                        if next_next_row in ["Vater", "Mutter"]:
+                            next_next_row_c_value = None
+                            if len(row) > 2:  # Check if there are enough columns in the current row
+                                next_next_row_c_value = sheet.cell(row=next_next_row_number, column=3).value  # Column C in the row after the next row
+
+                            # Add "Vater" or "Mutter" and their corresponding Column C to extracted_data
+                            extracted_data += (next_next_row, next_next_row_c_value)
+                            
+                            # Debug print after finding "Vater" or "Mutter" in the row after the next row
+                            print(f"Found '{next_next_row}' in the row after the next row, Column C: '{next_next_row_c_value}'")
+
+                            # Break out of the loop
+                            break
+
+            # Break out of the loop if "Vater" or "Mutter" is not found in the next row
+            else:
+                break
 
     wb.close()
     return extracted_data
+
 
 # Function to get the Excel file path from the user and save it to the configuration file
 def get_excel_file_path():
@@ -93,10 +137,14 @@ def read_excel_file_path():
         return None
 
 # Function to add data to a text file
-def add_data_to_text_file(file_path, data):
+def add_data_to_text_file(file_path, extracted_data):
     with open(file_path, "a") as file:
-        if data is not None:
-            file.write(data + "\n")  # Append data with a newline character
+        if extracted_data is not None:
+            for item in extracted_data[1:]:  # Start from the second item
+                if item is not None:
+                    file.write(str(item) + "\n")  # Append each item with a newline character
+
+
 
 def main():
     # Check if the configuration file for Word documents exists
@@ -162,7 +210,7 @@ def main():
         print(f"Data from {docx_files[0]} has been saved to {folder_name}.txt")
 
         # Open the generated .txt file with a 1-second delay
-        open_file_with_delay(output_file_path)
+        
 
     # Input: Provide a 4-digit number to search for in the Excel sheet (xlsx file)
     search_value = partial_number #input("Enter a 4-digit number to search for in the Excel sheet: ")
@@ -175,16 +223,23 @@ def main():
         return
 
     # Display the extracted data
-    cell_value, data = extracted_data
-    print(f"Cell Value: {cell_value}")
-    if data is not None:
-        print(f"Data: {data}\n")
+    cell_value = extracted_data[0] if extracted_data is not None else None
+
+    if cell_value is not None:
+        print(f"Cell Value: {cell_value}")
     else:
-        print("No data found in Column I\n")
+        print(f"No data found for '{search_value}' in the Excel sheet.")
+
 
     # Create a text file with the cell value as the filename and add the data to the file
     text_file_path = os.path.join(script_dir, f"{cell_value}.txt")
-    add_data_to_text_file(text_file_path, data)
+    add_data_to_text_file(text_file_path, extracted_data)
+    
+    # Open the generated .txt file with a 1-second delay after processing all folders
+    if output_file_path:
+        open_file_with_delay(output_file_path)
+    else:
+        print(f"output_file_path does not exist.")
 
 if __name__ == "__main__":
     main()
