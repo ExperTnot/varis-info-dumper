@@ -208,8 +208,6 @@ def main():
                 output_file.write(hp_number + "\n")
 
         print(f"Data from {docx_files[0]} has been saved to {folder_name}.txt")
-
-        # Open the generated .txt file with a 1-second delay
         
 
     # Input: Provide a 4-digit number to search for in the Excel sheet (xlsx file)
