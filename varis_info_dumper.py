@@ -4,6 +4,7 @@ import time
 import sys
 from docx import Document
 import openpyxl
+from tkinter import Tk, Button, Label, Frame
 
 CONFIG_FILE_DOCX = "config.txt"
 CONFIG_FILE_XLSX = "config_xlsx.txt"
@@ -144,6 +145,14 @@ def add_data_to_text_file(file_path, extracted_data):
                 if item is not None:
                     file.write(str(item) + "\n")  # Append each item with a newline character
 
+# Function to copy text to the clipboard
+def copy_to_clipboard(text):
+    r = Tk() # Create a Tkinter instance
+    r.withdraw()
+    r.clipboard_clear()
+    r.clipboard_append(text)
+    r.update()
+    r.destroy()
 
 
 def main():
@@ -234,10 +243,37 @@ def main():
     add_data_to_text_file(text_file_path, extracted_data)
     
     # Open the generated .txt file with a 1-second delay after processing all folders
-    if output_file_path:
+    """if output_file_path:
         open_file_with_delay(output_file_path)
     else:
-        print(f"output_file_path does not exist.")
+        print(f"output_file_path does not exist.")"""
+    
+    # Read the generated text file and create buttons for each line to copy to clipboard
+    if os.path.exists(output_file_path):
+        with open(output_file_path, "r") as output_file:
+            lines = output_file.readlines()
+
+        if lines:
+            r = Tk() # Create a single Tkinter instance
+            
+            # Set the width of the window (in pixels)
+            r.geometry("400x200")  # Adjust the width as needed
+            
+            print("Click the buttons to copy each line to the clipboard:")            
+            row_num = 0  # Initialize row number
+            background_colors = ["lightgrey", "darkgrey"]  # Define background colors
+            
+            for line in lines:
+                line = line.strip()  # Remove leading/trailing whitespace
+                frame = Frame(r, bg=background_colors[row_num % len(background_colors)])  # Use background color)  # Create a frame to hold the label and button
+                label = Label(frame, text=line, bg=background_colors[row_num % len(background_colors)])  # Set label background)
+                copy_button = Button(frame, text="Copy", command=lambda l=line: copy_to_clipboard(l))
+                label.pack(side="left")  # Align the label to the left
+                copy_button.pack(side="right")  # Align the button to the right
+                frame.pack(fill="both", expand=True)  # Make the frame expand to fill the window
+                row_num += 1  # Increment row number for the next row
+                
+            r.mainloop() # Start the Tkinter event loop
 
 if __name__ == "__main__":
     main()
