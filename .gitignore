@@ -1,2 +1,20 @@
 #ignore .txt
 *.txt
+
+*.zip
+
+*.exe
+
+*.toc
+
+*.pyc
+
+*temp*
+
+*pkg
+
+*html
+
+*manifest
+
+*pyz
