@@ -255,10 +255,10 @@ def main():
         add_data_to_text_file(text_file_path, extracted_data)
         
         # Open the generated .txt file with a 1-second delay after processing all folders
-        """if output_file_path:
-            open_file_with_delay(output_file_path)
-        else:
-            print(f"output_file_path does not exist.")"""
+        # if output_file_path:
+        #     open_file_with_delay(output_file_path)
+        # else:
+        #     print(f"output_file_path does not exist.")
         
         # Read the generated text file and create buttons for each line to copy to clipboard
         if os.path.exists(output_file_path):
