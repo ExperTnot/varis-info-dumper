@@ -132,7 +132,6 @@ def search_excel_and_extract_data(excel_file, search_value):
     wb.close()
     return extracted_data
 
-
 # Function to get the Excel file path from the user and save it to the configuration file
 def get_excel_file_path():
     excel_file_path = input("Enter the path to the Excel sheet (xlsx file): ")
@@ -164,7 +163,6 @@ def copy_to_clipboard(text):
     r.clipboard_append(text)
     r.update()
     r.destroy()
-
 
 def main():   
     # Check if the configuration file for Word documents exists
@@ -229,7 +227,6 @@ def main():
 
         print(f"Data from {docx_files[0]} has been saved to {folder_name}.txt")
         
-
     # Input: Provide a 4-digit number to search for in the Excel sheet (xlsx file)
     search_value = partial_number #input("Enter a 4-digit number to search for in the Excel sheet: ")
 
