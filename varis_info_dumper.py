@@ -19,7 +19,6 @@ def gui_thread(lines):
         r.clipboard_clear()
         r.clipboard_append(line_to_copy)
         r.update()
-        print(f"Line copied to clipboard: {line_to_copy}")
 
     def close_window():
         r.quit()
