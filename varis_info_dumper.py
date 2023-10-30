@@ -148,10 +148,12 @@ def search_excel_and_extract_data(excel_file, search_value):
 
                             # Break out of the loop
                             break
-
-            # Break out of the loop if "Vater" or "Mutter" is not found in the next row
-            else:
-                break
+                        # Break out of the loop if "Vater" or "Mutter" is not found in the second next row
+                        else:
+                            break
+                # Break out of the loop if "Vater" or "Mutter" is not found in the next row
+                else:
+                    break
 
     wb.close()
     return extracted_data
