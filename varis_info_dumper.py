@@ -5,9 +5,41 @@ import sys
 from docx import Document
 import openpyxl
 from tkinter import Tk, Button, Label, Frame
+import threading
 
 CONFIG_FILE_DOCX = "config.txt"
 CONFIG_FILE_XLSX = "config_xlsx.txt"
+
+#Threading
+def gui_thread(lines):
+    r = Tk()
+    r.title("Copy Lines to Clipboard")
+
+    def copy_to_clipboard(line_to_copy):
+        r.clipboard_clear()
+        r.clipboard_append(line_to_copy)
+        r.update()
+        print(f"Line copied to clipboard: {line_to_copy}")
+
+    def close_window():
+        r.quit()
+        r.destroy()
+
+    for line_num, line in enumerate(lines, start=1):
+        line = line.strip()
+        frame = Frame(r)
+        label_text = f"{line_num}. {line}"
+        label = Label(frame, text=label_text)
+        copy_button = Button(frame, text=f"Copy {line_num}", command=lambda l=line: copy_to_clipboard(l))
+        label.pack(side="left")
+        copy_button.pack(side="right")
+        frame.pack(fill="both", expand=True)
+
+    close_button = Button(r, text="Close", command=close_window)
+    close_button.pack()
+
+    r.protocol("WM_DELETE_WINDOW", close_window)
+    r.mainloop()
 
 # Function to extract data from a Word document
 def extract_word_data(docx_file):
@@ -252,35 +284,45 @@ def main():
         add_data_to_text_file(text_file_path, extracted_data)
             
         # Read the generated text file and create buttons for each line to copy to clipboard
+        # if os.path.exists(output_file_path):
+        #     with open(output_file_path, "r") as output_file:
+        #         lines = output_file.readlines()
+
+        #     if lines:
+        #         # Determine the required window height based on the number of lines
+        #         window_height = len(lines) * 50  # Adjust the multiplier as needed
+                
+        #         r = Tk() # Create a single Tkinter instance
+                
+        #         # Set the width of the window (in pixels)
+        #         r.geometry(f"200x{window_height}")  # Adjust the width as needed
+                
+        #         print("Click the buttons to copy each line to the clipboard:")            
+        #         row_num = 0  # Initialize row number
+        #         background_colors = ["white", "lightgrey", "darkgrey"]  # Define background colors
+                
+        #         for line_num, line in enumerate(lines, start=1):
+        #             line = line.strip()  # Remove leading/trailing whitespace
+        #             frame = Frame(r, bg=background_colors[row_num % len(background_colors)])  # Use background color)  # Create a frame to hold the label and button
+        #             label_text = f"{line_num}. {line}"  # Add line number to label
+        #             label = Label(frame, text=label_text, bg=background_colors[row_num % len(background_colors)])  # Set label background
+        #             copy_button = Button(frame, text=f"Copy {line_num}", command=lambda l=line: copy_to_clipboard(l))
+        #             label.pack(side="left")  # Align the label to the left
+        #             copy_button.pack(side="right")  # Align the button to the right
+        #             frame.pack(fill="both", expand=True)  # Make the frame expand to fill the window
+        #             row_num += 1  # Increment row number for the next row
+                    
+        #         r.mainloop() # Start the Tkinter event loop
         if os.path.exists(output_file_path):
             with open(output_file_path, "r") as output_file:
                 lines = output_file.readlines()
+                if lines:
+                    # Determine the required window height based on the number of lines
+                    window_height = len(lines) * 50
 
-            if lines:
-                # Determine the required window height based on the number of lines
-                window_height = len(lines) * 50  # Adjust the multiplier as needed
-                
-                r = Tk() # Create a single Tkinter instance
-                
-                # Set the width of the window (in pixels)
-                r.geometry(f"200x{window_height}")  # Adjust the width as needed
-                
-                print("Click the buttons to copy each line to the clipboard:")            
-                row_num = 0  # Initialize row number
-                background_colors = ["white", "lightgrey", "darkgrey"]  # Define background colors
-                
-                for line_num, line in enumerate(lines, start=1):
-                    line = line.strip()  # Remove leading/trailing whitespace
-                    frame = Frame(r, bg=background_colors[row_num % len(background_colors)])  # Use background color)  # Create a frame to hold the label and button
-                    label_text = f"{line_num}. {line}"  # Add line number to label
-                    label = Label(frame, text=label_text, bg=background_colors[row_num % len(background_colors)])  # Set label background
-                    copy_button = Button(frame, text=f"Copy {line_num}", command=lambda l=line: copy_to_clipboard(l))
-                    label.pack(side="left")  # Align the label to the left
-                    copy_button.pack(side="right")  # Align the button to the right
-                    frame.pack(fill="both", expand=True)  # Make the frame expand to fill the window
-                    row_num += 1  # Increment row number for the next row
-                    
-                r.mainloop() # Start the Tkinter event loop
+                    # Create a separate thread to run the GUI
+                    gui_thread_thread = threading.Thread(target=gui_thread, args=(lines,))
+                    gui_thread_thread.start()
     
         confirmation = input("Do you want to exit the program? (y/n): ")
         if not (confirmation.lower() == "no" or confirmation.lower() == "n"):
