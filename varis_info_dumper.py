@@ -164,121 +164,128 @@ def copy_to_clipboard(text):
     r.update()
     r.destroy()
 
-def main():   
-    # Check if the configuration file for Word documents exists
-    folder_path = read_folder_path()
+def main():
+    while True:
+           
+        # Check if the configuration file for Word documents exists
+        folder_path = read_folder_path()
 
-    if not folder_path:
-        print("Configuration file for Word documents not found or folder path not configured.")
-        folder_path = get_folder_path()
+        if not folder_path:
+            print("Configuration file for Word documents not found or folder path not configured.")
+            folder_path = get_folder_path()
 
-    # Check if the configuration file for Excel files exists
-    excel_file_path = read_excel_file_path()
+        # Check if the configuration file for Excel files exists
+        excel_file_path = read_excel_file_path()
 
-    if not excel_file_path:
-        print("Configuration file for Excel files not found or Excel file path not configured.")
-        excel_file_path = get_excel_file_path()
+        if not excel_file_path:
+            print("Configuration file for Excel files not found or Excel file path not configured.")
+            excel_file_path = get_excel_file_path()
 
-    if not os.path.exists(excel_file_path):
-        print(f"Excel file '{excel_file_path}' not found.")
-        return
+        if not os.path.exists(excel_file_path):
+            print(f"Excel file '{excel_file_path}' not found.")
+            return
 
-    # Input: Provide a partial number to search for
-    partial_number = input("Enter a partial number to search for: ")
+        # Input: Provide a partial number to search for
+        partial_number = input("Enter a partial number to search for: ")
 
-    folder_dir = folder_path
+        folder_dir = folder_path
 
-    matching_folders = []
-    for folder_name in os.listdir(folder_dir):
-        if os.path.isdir(os.path.join(folder_dir, folder_name)) and folder_name.startswith(partial_number):
-            matching_folders.append(folder_name)
+        matching_folders = []
+        for folder_name in os.listdir(folder_dir):
+            if os.path.isdir(os.path.join(folder_dir, folder_name)) and folder_name.startswith(partial_number):
+                matching_folders.append(folder_name)
 
-    if not matching_folders:
-        print(f"No matching folders found for '{partial_number}' in Word documents.")
-        return
+        if not matching_folders:
+            print(f"No matching folders found for '{partial_number}' in Word documents.")
+            return
 
-    # Determine the directory of the executable (script or .exe)
-    if getattr(sys, 'frozen', False):
-    # The script is running as a compiled executable (.exe)
-        script_dir = os.path.dirname(sys.executable)
-    else:
-    # The script is running as a regular Python script
-        script_dir = os.path.dirname(__file__)
+        # Determine the directory of the executable (script or .exe)
+        if getattr(sys, 'frozen', False):
+        # The script is running as a compiled executable (.exe)
+            script_dir = os.path.dirname(sys.executable)
+        else:
+        # The script is running as a regular Python script
+            script_dir = os.path.dirname(__file__)
 
-    for folder_name in matching_folders:
-        folder_path = os.path.join(folder_dir, folder_name)
-        docx_files = [file for file in os.listdir(folder_path) if file.endswith(".docx") and file.startswith(folder_name)]
+        for folder_name in matching_folders:
+            folder_path = os.path.join(folder_dir, folder_name)
+            docx_files = [file for file in os.listdir(folder_path) if file.endswith(".docx") and file.startswith(folder_name)]
 
-        if not docx_files:
-            print(f"No .docx files with the same leading number found in folder '{folder_name}'.")
-            continue
+            if not docx_files:
+                print(f"No .docx files with the same leading number found in folder '{folder_name}'.")
+                continue
 
-        docx_file = os.path.join(folder_path, docx_files[0])  # Use the first .docx file found
+            docx_file = os.path.join(folder_path, docx_files[0])  # Use the first .docx file found
 
-        word_data = extract_word_data(docx_file)
+            word_data = extract_word_data(docx_file)
 
-        # Path for the output text file in the same directory as the script
-        output_file_path = os.path.join(script_dir, f"{folder_name}.txt")
+            # Path for the output text file in the same directory as the script
+            output_file_path = os.path.join(script_dir, f"{folder_name}.txt")
 
-        # Write the collected HP numbers to the output text file
-        with open(output_file_path, "w") as output_file:
-            for hp_number in word_data:
-                output_file.write(hp_number + "\n")
+            # Write the collected HP numbers to the output text file
+            with open(output_file_path, "w") as output_file:
+                for hp_number in word_data:
+                    output_file.write(hp_number + "\n")
 
-        print(f"Data from {docx_files[0]} has been saved to {folder_name}.txt")
-        
-    # Input: Provide a 4-digit number to search for in the Excel sheet (xlsx file)
-    search_value = partial_number #input("Enter a 4-digit number to search for in the Excel sheet: ")
-
-    # Search the Excel sheet and extract data
-    extracted_data = search_excel_and_extract_data(excel_file_path, search_value)
-
-    if extracted_data is None:
-        print(f"No data found for '{search_value}' in the Excel sheet.")
-        return
-
-    # Display the extracted data
-    cell_value = extracted_data[0] if extracted_data is not None else None
-
-    if cell_value is not None:
-        print(f"Cell Value: {cell_value}")
-    else:
-        print(f"No data found for '{search_value}' in the Excel sheet.")
-
-    # Create a text file with the cell value as the filename and add the data to the file
-    text_file_path = os.path.join(script_dir, f"{cell_value}.txt")
-    add_data_to_text_file(text_file_path, extracted_data)
-        
-    # Read the generated text file and create buttons for each line to copy to clipboard
-    if os.path.exists(output_file_path):
-        with open(output_file_path, "r") as output_file:
-            lines = output_file.readlines()
-
-        if lines:
-            # Determine the required window height based on the number of lines
-            window_height = len(lines) * 50  # Adjust the multiplier as needed
+            print(f"Data from {docx_files[0]} has been saved to {folder_name}.txt")
             
-            r = Tk() # Create a single Tkinter instance
+        # Input: Provide a 4-digit number to search for in the Excel sheet (xlsx file)
+        search_value = partial_number #input("Enter a 4-digit number to search for in the Excel sheet: ")
+
+        # Search the Excel sheet and extract data
+        extracted_data = search_excel_and_extract_data(excel_file_path, search_value)
+
+        if extracted_data is None:
+            print(f"No data found for '{search_value}' in the Excel sheet.")
+            return
+
+        # Display the extracted data
+        cell_value = extracted_data[0] if extracted_data is not None else None
+
+        if cell_value is not None:
+            print(f"Cell Value: {cell_value}")
+        else:
+            print(f"No data found for '{search_value}' in the Excel sheet.")
+
+        # Create a text file with the cell value as the filename and add the data to the file
+        text_file_path = os.path.join(script_dir, f"{cell_value}.txt")
+        add_data_to_text_file(text_file_path, extracted_data)
             
-            # Set the width of the window (in pixels)
-            r.geometry(f"200x{window_height}")  # Adjust the width as needed
-            
-            print("Click the buttons to copy each line to the clipboard:")            
-            row_num = 0  # Initialize row number
-            background_colors = ["white", "lightgrey", "darkgrey"]  # Define background colors
-            
-            for line_num, line in enumerate(lines, start=1):
-                line = line.strip()  # Remove leading/trailing whitespace
-                frame = Frame(r, bg=background_colors[row_num % len(background_colors)])  # Use background color)  # Create a frame to hold the label and button
-                label_text = f"{line_num}. {line}"  # Add line number to label
-                label = Label(frame, text=label_text, bg=background_colors[row_num % len(background_colors)])  # Set label background
-                copy_button = Button(frame, text=f"Copy {line_num}", command=lambda l=line: copy_to_clipboard(l))
-                label.pack(side="left")  # Align the label to the left
-                copy_button.pack(side="right")  # Align the button to the right
-                frame.pack(fill="both", expand=True)  # Make the frame expand to fill the window
-                row_num += 1  # Increment row number for the next row
+        # Read the generated text file and create buttons for each line to copy to clipboard
+        if os.path.exists(output_file_path):
+            with open(output_file_path, "r") as output_file:
+                lines = output_file.readlines()
+
+            if lines:
+                # Determine the required window height based on the number of lines
+                window_height = len(lines) * 50  # Adjust the multiplier as needed
                 
-            r.mainloop() # Start the Tkinter event loop
+                r = Tk() # Create a single Tkinter instance
+                
+                # Set the width of the window (in pixels)
+                r.geometry(f"200x{window_height}")  # Adjust the width as needed
+                
+                print("Click the buttons to copy each line to the clipboard:")            
+                row_num = 0  # Initialize row number
+                background_colors = ["white", "lightgrey", "darkgrey"]  # Define background colors
+                
+                for line_num, line in enumerate(lines, start=1):
+                    line = line.strip()  # Remove leading/trailing whitespace
+                    frame = Frame(r, bg=background_colors[row_num % len(background_colors)])  # Use background color)  # Create a frame to hold the label and button
+                    label_text = f"{line_num}. {line}"  # Add line number to label
+                    label = Label(frame, text=label_text, bg=background_colors[row_num % len(background_colors)])  # Set label background
+                    copy_button = Button(frame, text=f"Copy {line_num}", command=lambda l=line: copy_to_clipboard(l))
+                    label.pack(side="left")  # Align the label to the left
+                    copy_button.pack(side="right")  # Align the button to the right
+                    frame.pack(fill="both", expand=True)  # Make the frame expand to fill the window
+                    row_num += 1  # Increment row number for the next row
+                    
+                r.mainloop() # Start the Tkinter event loop
+    
+        confirmation = input("Do you want to exit the program? (y/n): ")
+        if not (confirmation.lower() == "no" or confirmation.lower() == "n"):
+            print("Exiting the program.")
+            break
 
 if __name__ == "__main__":
     main()
