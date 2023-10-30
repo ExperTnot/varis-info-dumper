@@ -120,8 +120,8 @@ def search_excel_and_extract_data(excel_file, search_value):
 
                 if next_row in ["Vater", "Mutter"]:
                     next_row_c_value = None
-                    if len(row) > 2:  # Check if there are enough columns in the current row
-                        next_row_c_value = sheet.cell(row=next_row_number, column=4).value  # Column C in the next row
+                    
+                    next_row_c_value = sheet.cell(row=next_row_number, column=4).value  # Column C in the next row
 
                     # Add "Vater" or "Mutter" and their corresponding Column C to extracted_data
                     extracted_data += (next_row, next_row_c_value)
@@ -137,8 +137,8 @@ def search_excel_and_extract_data(excel_file, search_value):
 
                         if next_next_row in ["Vater", "Mutter"]:
                             next_next_row_c_value = None
-                            if len(row) > 2:  # Check if there are enough columns in the current row
-                                next_next_row_c_value = sheet.cell(row=next_next_row_number, column=4).value  # Column C in the row after the next row
+                            
+                            next_next_row_c_value = sheet.cell(row=next_next_row_number, column=4).value  # Column C in the row after the next row
 
                             # Add "Vater" or "Mutter" and their corresponding Column C to extracted_data
                             extracted_data += (next_next_row, next_next_row_c_value)
