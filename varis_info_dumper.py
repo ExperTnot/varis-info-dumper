@@ -2,6 +2,7 @@ import os
 import re
 import time
 import sys
+import re
 from docx import Document
 import openpyxl
 from tkinter import Tk, Button, Label, Frame
@@ -54,22 +55,12 @@ def extract_word_data(docx_file):
 
     for paragraph in document.paragraphs:
         text = paragraph.text
-        occurrences = []
-        start = 0
 
-        while True:
-            start = text.find("HP:", start)
+        # Use regular expression to find HP numbers
+        hp_numbers = re.findall(r'HP:\d{7}', text)
 
-            if start == -1:
-                break
-
-            end = start + 10  # 10 characters (HP:0000000)
-            hp_number = text[start:end]
-            occurrences.append(hp_number)
-            start = end
-
-        if occurrences:
-            data.extend(occurrences)
+        if hp_numbers:
+            data.extend(hp_numbers)
 
     return data
 
@@ -192,15 +183,6 @@ def add_data_to_text_file(file_path, extracted_data):
             for item in extracted_data[1:]:  # Start from the second item
                 if item is not None:
                     file.write(str(item) + "\n")  # Append each item with a newline character
-
-# Function to copy text to the clipboard
-def copy_to_clipboard(text):
-    r = Tk() # Create a Tkinter instance
-    r.withdraw()
-    r.clipboard_clear()
-    r.clipboard_append(text)
-    r.update()
-    r.destroy()
 
 def main():
     while True:
