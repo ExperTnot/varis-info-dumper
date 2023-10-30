@@ -111,11 +111,6 @@ def search_excel_and_extract_data(excel_file, search_value):
 
             # Debug print after finding a matching cell in Column C
             print(f"Found '{search_value}' in cell '{cell_value}', extracted Column I value: '{column_i_value}'")
-            
-            # Check if "Vater" or "Mutter" is in Column I
-            if column_i_value in ["Vater", "Mutter"]:
-                wb.close()
-                #raise StopProgramException(f"Found '{column_i_value}' in Column I. Stopping the program.", column_i_value)
 
             # Search for "Vater" or "Mutter" in the next row
             next_row_number = row_number + 1  # Row number of the next row
