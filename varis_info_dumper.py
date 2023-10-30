@@ -24,21 +24,28 @@ def gui_thread(lines):
     def close_window():
         r.quit()
         r.destroy()
+    
+    background_colors = ["white", "lightgrey", "darkgrey"]  # Define background colors
+    row_num = 0  # Initialize row number
 
     for line_num, line in enumerate(lines, start=1):
         line = line.strip()
-        frame = Frame(r)
+        frame = Frame(r, bg=background_colors[row_num % len(background_colors)])
         label_text = f"{line_num}. {line}"
-        label = Label(frame, text=label_text)
-        copy_button = Button(frame, text=f"Copy {line_num}", command=lambda l=line: copy_to_clipboard(l))
+        label = Label(frame, text=label_text, bg=background_colors[row_num % len(background_colors)])
+        copy_button = Button(frame, text=f"Copy {line_num}", command=lambda line=line: copy_to_clipboard(line))
         label.pack(side="left")
         copy_button.pack(side="right")
         frame.pack(fill="both", expand=True)
+        row_num += 1
 
     close_button = Button(r, text="Close", command=close_window)
     close_button.pack()
 
     r.protocol("WM_DELETE_WINDOW", close_window)
+    
+    window_height = len(lines) * 50  # Adjust the multiplier as needed
+    r.geometry(f"200x{window_height}") # Adjust the width as needed
     r.mainloop()
 
 # Function to extract data from a Word document
@@ -328,6 +335,9 @@ def main():
         if not (confirmation.lower() == "no" or confirmation.lower() == "n"):
             print("Exiting the program.")
             break
+        elif (confirmation.lower() == "no" or confirmation.lower() == "n"):
+            print("------------------------------------------------------------------------")
+            
 
 if __name__ == "__main__":
     main()
