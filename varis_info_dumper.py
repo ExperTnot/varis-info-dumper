@@ -182,6 +182,7 @@ def add_data_to_text_file(file_path, extracted_data):
                     file.write(str(item) + "\n")  # Append each item with a newline character
 
 def main():
+    
     while True:
            
         # Check if the configuration file for Word documents exists
@@ -205,13 +206,15 @@ def main():
         # Input: Provide a partial number to search for
         partial_number = input("Enter a partial number to search for: ")
 
-        folder_dir = folder_path
+        folder_dir = folder_path # Path to the folder with the Word documents
 
+        # Search for folders with the same leading number as the partial number
         matching_folders = []
         for folder_name in os.listdir(folder_dir):
             if os.path.isdir(os.path.join(folder_dir, folder_name)) and folder_name.startswith(partial_number):
                 matching_folders.append(folder_name)
 
+        # Check if any matching folders were found
         if not matching_folders:
             print(f"No matching folders found for '{partial_number}' in Word documents.")
             return
@@ -224,6 +227,7 @@ def main():
         # The script is running as a regular Python script
             script_dir = os.path.dirname(__file__)
 
+        # Iterate through the matching folders and extract data from the .docx files
         for folder_name in matching_folders:
             folder_path = os.path.join(folder_dir, folder_name)
             docx_files = [file for file in os.listdir(folder_path) if file.endswith(".docx") and file.startswith(folder_name)]
@@ -234,7 +238,7 @@ def main():
 
             docx_file = os.path.join(folder_path, docx_files[0])  # Use the first .docx file found
 
-            word_data = extract_word_data(docx_file)
+            word_data = extract_word_data(docx_file) # Extract data from the .docx file
 
             # Path for the output text file in the same directory as the script
             output_file_path = os.path.join(script_dir, f"{folder_name}.txt")
@@ -268,7 +272,7 @@ def main():
         text_file_path = os.path.join(script_dir, f"{cell_value}.txt")
         add_data_to_text_file(text_file_path, extracted_data)
                     
-        # Start thread to display gui
+        # Start thread to read file and display gui
         if os.path.exists(output_file_path):
             with open(output_file_path, "r") as output_file:
                 lines = output_file.readlines()
@@ -279,7 +283,8 @@ def main():
                     # Create a separate thread to run the GUI
                     gui_thread_thread = threading.Thread(target=gui_thread, args=(lines,))
                     gui_thread_thread.start()
-    
+
+        # Ask for next or close
         confirmation = input("Do you want to exit the program? (y/n): ")
         if not (confirmation.lower() == "no" or confirmation.lower() == "n"):
             print("Exiting the program.")
