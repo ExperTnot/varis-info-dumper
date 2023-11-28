@@ -117,14 +117,14 @@ def search_excel_and_extract_data(excel_file, search_value):
             extracted_data = (cell_value, column_i_value)
 
             # Debug print after finding a matching cell in Column C
-            print(f"Found '{search_value}' in cell '{cell_value}', extracted Column I value: '{column_i_value}'")
+            print(f"Found \033[92m{search_value}\033[0m in cell \033[92m{cell_value}\033[0m, extracted Column I value: \033[92m{column_i_value}\033[0m")
 
             # Search for "Vater" or "Mutter" in the next rows
             next_row_values = search_next_rows(sheet, row_number + 1, 9, ["Vater", "Mutter"])  # Column I is index 9
             extracted_data += next_row_values
 
             # Debug print after finding "Vater" or "Mutter" in the next rows
-            print(f"Found '{next_row_values[0]}' in the next row, Column C: '{next_row_values[1]}'")
+            print(f"Found \033[92m{next_row_values[0]}\033[0m in the next row, Column C: \033[92m{next_row_values[1]}\033[0m")
 
             break  # Stop searching after finding the first match
 
@@ -214,7 +214,7 @@ def main():
                     for hp_number in word_data:
                         output_file.write(hp_number + "\n")
 
-                print(f"Data from {docx_files[0]} has been saved to {folder_name}.txt")
+                print(f"Data from \033[92m{docx_files[0]}\033[0m has been saved to \033[92m{folder_name}.txt\033[0m")
                 
             # Input: Provide a 4-digit number to search for in the Excel sheet (xlsx file)
             search_value = partial_number #input("Enter a 4-digit number to search for in the Excel sheet: ")
@@ -230,7 +230,7 @@ def main():
             cell_value = extracted_data[0] if extracted_data is not None else None
 
             if cell_value is not None:
-                print(f"Cell Value: {cell_value}")
+                print(f"Cell Value: \033[92m{cell_value}\033[0m")
             else:
                 print(f"No data found for '{search_value}' in the Excel sheet.")
 
@@ -249,19 +249,13 @@ def main():
                         # Create a separate thread to run the GUI
                         gui_thread_thread = threading.Thread(target=gui_thread, args=(lines,))
                         gui_thread_thread.start()
-
-            # Ask for next or close
-            confirmation = input("Do you want to exit the program? (y/n): ")
-            if not (confirmation.lower() == "no" or confirmation.lower() == "n"):
-                print("Exiting the program.")
-                break
-            elif (confirmation.lower() == "no" or confirmation.lower() == "n"):
-                print("------------------------------------------------------------------------")
-
-        #parent, go next:
-        print(f"No matching folders found for '{partial_number}' in Word documents.")
+            
+        else:
+            print(f"No matching folders found for '{partial_number}' in Word documents.")
+    
         # Ask for next or close
-        confirmation = input("Do you want to exit the program? (y/n): ")
+        confirmation = input("Do you want to exit the program? \033[94m(y/n)\033[0m: ")
+        print("\033[91mDONT FORGET TO CLOSE THE GUI IF IT IS STILL OPEN!\033[0m")
         if not (confirmation.lower() == "no" or confirmation.lower() == "n"):
             print("Exiting the program.")
             break
