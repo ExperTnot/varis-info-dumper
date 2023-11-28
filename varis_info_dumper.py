@@ -84,13 +84,22 @@ def read_folder_path():
     else:
         return None
 
-# Custom exception for stopping the program
-class StopProgramException(Exception):
-    def __init__(self, message, value=None):
-        super().__init__(message)
-        self.value = value
+def get_cell_value(row, column_index):
+    """Helper function to get cell value from a row"""
+    if len(row) > column_index:
+        return row[column_index]
+    print(f"Column index {column_index} is out of range.")
+    return None
 
-# Function to search for a 4-digit number in an Excel sheet and extract data from a specific column (Column C -> Column I)
+def search_next_rows(sheet, start_row, column_index, search_values):
+    """Helper function to search for specific values in next rows"""
+    for row_number in range(start_row, sheet.max_row + 1):
+        cell_value = sheet.cell(row=row_number, column=column_index).value
+        if cell_value in search_values:
+            return (cell_value, get_cell_value(sheet[row_number], 2).value)  # Column C is index 2
+    print(f"Values {search_values} not found in Column {column_index}.")
+    return (None, None)
+
 def search_excel_and_extract_data(excel_file, search_value):
     wb = openpyxl.load_workbook(excel_file)
     sheet = wb.active
@@ -99,61 +108,25 @@ def search_excel_and_extract_data(excel_file, search_value):
 
     # Iterate through rows in Column C
     for row_number, row in enumerate(sheet.iter_rows(min_row=2, values_only=True), start=2):
-        cell_value = str(row[2])  # Column C is the third column (index 2)
+        cell_value = str(get_cell_value(row, 2))  # Column C is the third column (index 2)
 
         if search_value in cell_value:
             # Extract data from Column I (if available)
-            column_i_value = None
-            if len(row) > 8:  # Check if there are enough columns in the current row
-                column_i_value = row[8]  # Column I (index 8)
+            column_i_value = get_cell_value(row, 8)  # Column I (index 8)
 
             extracted_data = (cell_value, column_i_value)
 
             # Debug print after finding a matching cell in Column C
             print(f"Found '{search_value}' in cell '{cell_value}', extracted Column I value: '{column_i_value}'")
 
-            # Search for "Vater" or "Mutter" in the next row
-            next_row_number = row_number + 1  # Row number of the next row
+            # Search for "Vater" or "Mutter" in the next rows
+            next_row_values = search_next_rows(sheet, row_number + 1, 9, ["Vater", "Mutter"])  # Column I is index 9
+            extracted_data += next_row_values
 
-            if next_row_number <= sheet.max_row:
-                next_row = sheet.cell(row=next_row_number, column=9).value  # Column I in the next row
+            # Debug print after finding "Vater" or "Mutter" in the next rows
+            print(f"Found '{next_row_values[0]}' in the next row, Column C: '{next_row_values[1]}'")
 
-                if next_row in ["Vater", "Mutter"]:
-                    next_row_c_value = None
-                    
-                    next_row_c_value = sheet.cell(row=next_row_number, column=4).value  # Column C in the next row
-
-                    # Add "Vater" or "Mutter" and their corresponding Column C to extracted_data
-                    extracted_data += (next_row, next_row_c_value)
-                    
-                    # Debug print after finding "Vater" or "Mutter" in the next row
-                    print(f"Found '{next_row}' in the next row, Column C: '{next_row_c_value}'")
-
-                    # Search for "Vater" or "Mutter" in the row after the next row
-                    next_next_row_number = next_row_number + 1  # Row number of the row after the next row
-
-                    if next_next_row_number <= sheet.max_row:
-                        next_next_row = sheet.cell(row=next_next_row_number, column=9).value  # Column I in the row after the next row
-
-                        if next_next_row in ["Vater", "Mutter"]:
-                            next_next_row_c_value = None
-                            
-                            next_next_row_c_value = sheet.cell(row=next_next_row_number, column=4).value  # Column C in the row after the next row
-
-                            # Add "Vater" or "Mutter" and their corresponding Column C to extracted_data
-                            extracted_data += (next_next_row, next_next_row_c_value)
-                            
-                            # Debug print after finding "Vater" or "Mutter" in the row after the next row
-                            print(f"Found '{next_next_row}' in the row after the next row, Column C: '{next_next_row_c_value}'")
-
-                            # Break out of the loop
-                            break
-                        # Break out of the loop if "Vater" or "Mutter" is not found in the second next row
-                        else:
-                            break
-                # Break out of the loop if "Vater" or "Mutter" is not found in the next row
-                else:
-                    break
+            break  # Stop searching after finding the first match
 
     wb.close()
     return extracted_data
@@ -214,16 +187,16 @@ def main():
             if os.path.isdir(os.path.join(folder_dir, folder_name)) and folder_name.startswith(partial_number):
                 matching_folders.append(folder_name)
 
+        # Determine the directory of the executable (script or .exe)
+        if getattr(sys, 'frozen', False):
+        # The script is running as a compiled executable (.exe)
+            script_dir = os.path.dirname(sys.executable)
+        else:
+        # The script is running as a regular Python script
+            script_dir = os.path.dirname(__file__)
+
         # Check if any matching folders were found
         if matching_folders:
-
-            # Determine the directory of the executable (script or .exe)
-            if getattr(sys, 'frozen', False):
-            # The script is running as a compiled executable (.exe)
-                script_dir = os.path.dirname(sys.executable)
-            else:
-            # The script is running as a regular Python script
-                script_dir = os.path.dirname(__file__)
 
             # Iterate through the matching folders and extract data from the .docx files
             for folder_name in matching_folders:
