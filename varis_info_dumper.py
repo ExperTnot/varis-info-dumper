@@ -7,7 +7,7 @@ from docx import Document
 import openpyxl
 from tkinter import Tk, Button, Label, Frame
 import threading
-from colorama import Fore, Style
+from colorama import init, Fore, Style
 
 CONFIG_FILE_DOCX = "config.txt"
 CONFIG_FILE_XLSX = "config_xlsx.txt"
@@ -163,6 +163,7 @@ def read_config_file(file_type):
     return file_path
 
 def main():
+    init() # Initialize colorama
     while True:
         # Check if the configuration files exist
         folder_path = read_config_file('word')
@@ -231,7 +232,7 @@ def main():
             cell_value = extracted_data[0] if extracted_data is not None else None
 
             if cell_value is not None:
-                print(f"Cell Value: \033[92m{cell_value}\033[0m")
+                print(f"Cell Value: {Fore.GREEN}{cell_value}{Style.RESET_ALL}")
             else:
                 print(f"No data found for '{search_value}' in the Excel sheet.")
 
