@@ -215,75 +215,83 @@ def main():
                 matching_folders.append(folder_name)
 
         # Check if any matching folders were found
-        if not matching_folders:
-            print(f"No matching folders found for '{partial_number}' in Word documents.")
-            return
+        if matching_folders:
 
-        # Determine the directory of the executable (script or .exe)
-        if getattr(sys, 'frozen', False):
-        # The script is running as a compiled executable (.exe)
-            script_dir = os.path.dirname(sys.executable)
-        else:
-        # The script is running as a regular Python script
-            script_dir = os.path.dirname(__file__)
+            # Determine the directory of the executable (script or .exe)
+            if getattr(sys, 'frozen', False):
+            # The script is running as a compiled executable (.exe)
+                script_dir = os.path.dirname(sys.executable)
+            else:
+            # The script is running as a regular Python script
+                script_dir = os.path.dirname(__file__)
 
-        # Iterate through the matching folders and extract data from the .docx files
-        for folder_name in matching_folders:
-            folder_path = os.path.join(folder_dir, folder_name)
-            docx_files = [file for file in os.listdir(folder_path) if file.endswith(".docx") and file.startswith(folder_name)]
+            # Iterate through the matching folders and extract data from the .docx files
+            for folder_name in matching_folders:
+                folder_path = os.path.join(folder_dir, folder_name)
+                docx_files = [file for file in os.listdir(folder_path) if file.endswith(".docx") and file.startswith(folder_name)]
 
-            if not docx_files:
-                print(f"No .docx files with the same leading number found in folder '{folder_name}'.")
-                continue
+                if not docx_files:
+                    print(f"No .docx files with the same leading number found in folder '{folder_name}'.")
+                    continue
 
-            docx_file = os.path.join(folder_path, docx_files[0])  # Use the first .docx file found
+                docx_file = os.path.join(folder_path, docx_files[0])  # Use the first .docx file found
 
-            word_data = extract_word_data(docx_file) # Extract data from the .docx file
+                word_data = extract_word_data(docx_file) # Extract data from the .docx file
 
-            # Path for the output text file in the same directory as the script
-            output_file_path = os.path.join(script_dir, f"{folder_name}.txt")
+                # Path for the output text file in the same directory as the script
+                output_file_path = os.path.join(script_dir, f"{folder_name}.txt")
 
-            # Write the collected HP numbers to the output text file
-            with open(output_file_path, "w") as output_file:
-                for hp_number in word_data:
-                    output_file.write(hp_number + "\n")
+                # Write the collected HP numbers to the output text file
+                with open(output_file_path, "w") as output_file:
+                    for hp_number in word_data:
+                        output_file.write(hp_number + "\n")
 
-            print(f"Data from {docx_files[0]} has been saved to {folder_name}.txt")
-            
-        # Input: Provide a 4-digit number to search for in the Excel sheet (xlsx file)
-        search_value = partial_number #input("Enter a 4-digit number to search for in the Excel sheet: ")
+                print(f"Data from {docx_files[0]} has been saved to {folder_name}.txt")
+                
+            # Input: Provide a 4-digit number to search for in the Excel sheet (xlsx file)
+            search_value = partial_number #input("Enter a 4-digit number to search for in the Excel sheet: ")
 
-        # Search the Excel sheet and extract data
-        extracted_data = search_excel_and_extract_data(excel_file_path, search_value)
+            # Search the Excel sheet and extract data
+            extracted_data = search_excel_and_extract_data(excel_file_path, search_value)
 
-        if extracted_data is None:
-            print(f"No data found for '{search_value}' in the Excel sheet.")
-            return
+            if extracted_data is None:
+                print(f"No data found for '{search_value}' in the Excel sheet.")
+                return
 
-        # Display the extracted data
-        cell_value = extracted_data[0] if extracted_data is not None else None
+            # Display the extracted data
+            cell_value = extracted_data[0] if extracted_data is not None else None
 
-        if cell_value is not None:
-            print(f"Cell Value: {cell_value}")
-        else:
-            print(f"No data found for '{search_value}' in the Excel sheet.")
+            if cell_value is not None:
+                print(f"Cell Value: {cell_value}")
+            else:
+                print(f"No data found for '{search_value}' in the Excel sheet.")
 
-        # Create a text file with the cell value as the filename and add the data to the file
-        text_file_path = os.path.join(script_dir, f"{cell_value}.txt")
-        add_data_to_text_file(text_file_path, extracted_data)
-                    
-        # Start thread to read file and display gui
-        if os.path.exists(output_file_path):
-            with open(output_file_path, "r") as output_file:
-                lines = output_file.readlines()
-                if lines:
-                    # Determine the required window height based on the number of lines
-                    window_height = len(lines) * 50
+            # Create a text file with the cell value as the filename and add the data to the file
+            text_file_path = os.path.join(script_dir, f"{cell_value}.txt")
+            add_data_to_text_file(text_file_path, extracted_data)
+                        
+            # Start thread to read file and display gui
+            if os.path.exists(output_file_path):
+                with open(output_file_path, "r") as output_file:
+                    lines = output_file.readlines()
+                    if lines:
+                        # Determine the required window height based on the number of lines
+                        window_height = len(lines) * 50
 
-                    # Create a separate thread to run the GUI
-                    gui_thread_thread = threading.Thread(target=gui_thread, args=(lines,))
-                    gui_thread_thread.start()
+                        # Create a separate thread to run the GUI
+                        gui_thread_thread = threading.Thread(target=gui_thread, args=(lines,))
+                        gui_thread_thread.start()
 
+            # Ask for next or close
+            confirmation = input("Do you want to exit the program? (y/n): ")
+            if not (confirmation.lower() == "no" or confirmation.lower() == "n"):
+                print("Exiting the program.")
+                break
+            elif (confirmation.lower() == "no" or confirmation.lower() == "n"):
+                print("------------------------------------------------------------------------")
+
+        #parent, go next:
+        print(f"No matching folders found for '{partial_number}' in Word documents.")
         # Ask for next or close
         confirmation = input("Do you want to exit the program? (y/n): ")
         if not (confirmation.lower() == "no" or confirmation.lower() == "n"):
