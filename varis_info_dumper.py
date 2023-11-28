@@ -7,6 +7,7 @@ from docx import Document
 import openpyxl
 from tkinter import Tk, Button, Label, Frame
 import threading
+from colorama import Fore, Style
 
 CONFIG_FILE_DOCX = "config.txt"
 CONFIG_FILE_XLSX = "config_xlsx.txt"
@@ -117,14 +118,14 @@ def search_excel_and_extract_data(excel_file, search_value):
             extracted_data = (cell_value, column_i_value)
 
             # Debug print after finding a matching cell in Column C
-            print(f"Found \033[92m{search_value}\033[0m in cell \033[92m{cell_value}\033[0m, extracted Column I value: \033[92m{column_i_value}\033[0m")
+            print(f"Found {Fore.GREEN}{search_value}{Style.RESET_ALL} in cell {Fore.GREEN}{cell_value}{Style.RESET_ALL}, extracted Column I value: {Fore.GREEN}{column_i_value}{Style.RESET_ALL}")
 
             # Search for "Vater" or "Mutter" in the next rows
             next_row_values = search_next_rows(sheet, row_number + 1, 9, ["Vater", "Mutter"])  # Column I is index 9
             extracted_data += next_row_values
 
             # Debug print after finding "Vater" or "Mutter" in the next rows
-            print(f"Found \033[92m{next_row_values[0]}\033[0m in the next row, Column C: \033[92m{next_row_values[1]}\033[0m")
+            print(f"Found {Fore.GREEN}{next_row_values[0]}{Style.RESET_ALL} in the next row, Column C: {Fore.GREEN}{next_row_values[1]}{Style.RESET_ALL}")
 
             break  # Stop searching after finding the first match
 
@@ -214,7 +215,7 @@ def main():
                     for hp_number in word_data:
                         output_file.write(hp_number + "\n")
 
-                print(f"Data from \033[92m{docx_files[0]}\033[0m has been saved to \033[92m{folder_name}.txt\033[0m")
+                print(f"Data from {Fore.GREEN}{docx_files[0]}{Style.RESET_ALL} has been saved to {Fore.GREEN}{folder_name}.txt{Style.RESET_ALL}")
                 
             # Input: Provide a 4-digit number to search for in the Excel sheet (xlsx file)
             search_value = partial_number #input("Enter a 4-digit number to search for in the Excel sheet: ")
@@ -254,8 +255,8 @@ def main():
             print(f"No matching folders found for '{partial_number}' in Word documents.")
     
         # Ask for next or close
-        confirmation = input("Do you want to exit the program? \033[94m(y/n)\033[0m: ")
-        print("\033[91mDONT FORGET TO CLOSE THE GUI IF IT IS STILL OPEN!\033[0m")
+        confirmation = input(f"Do you want to exit the program? {Fore.BLUE}(y/n){Style.RESET_ALL}: ")
+        print(f"{Fore.RED}DONT FORGET TO CLOSE THE GUI IF IT IS STILL OPEN!{Style.RESET_ALL}")
         if not (confirmation.lower() == "no" or confirmation.lower() == "n"):
             print("Exiting the program.")
             break
