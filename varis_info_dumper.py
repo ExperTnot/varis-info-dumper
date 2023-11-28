@@ -154,23 +154,18 @@ def add_data_to_text_file(file_path, extracted_data):
                 if item is not None:
                     file.write(str(item) + "\n")  # Append each item with a newline character
 
+def read_config_file(file_type):
+    file_path = read_folder_path() if file_type == 'word' else read_excel_file_path()
+    if not file_path:
+        print(f"Configuration file for {file_type} documents not found or {file_type} file path not configured.")
+        file_path = get_folder_path() if file_type == 'word' else get_excel_file_path()
+    return file_path
+
 def main():
-    
     while True:
-           
-        # Check if the configuration file for Word documents exists
-        folder_path = read_folder_path()
-
-        if not folder_path:
-            print("Configuration file for Word documents not found or folder path not configured.")
-            folder_path = get_folder_path()
-
-        # Check if the configuration file for Excel files exists
-        excel_file_path = read_excel_file_path()
-
-        if not excel_file_path:
-            print("Configuration file for Excel files not found or Excel file path not configured.")
-            excel_file_path = get_excel_file_path()
+        # Check if the configuration files exist
+        folder_path = read_config_file('word')
+        excel_file_path = read_config_file('excel')
 
         if not os.path.exists(excel_file_path):
             print(f"Excel file '{excel_file_path}' not found.")
