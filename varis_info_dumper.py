@@ -97,7 +97,7 @@ def search_next_rows(sheet, start_row, column_index, search_values):
     for row_number in range(start_row, sheet.max_row + 1):
         cell_value = sheet.cell(row=row_number, column=column_index).value
         if cell_value in search_values:
-            return (cell_value, get_cell_value(sheet[row_number], 2).value)  # Column C is index 2
+            return (cell_value, get_cell_value(sheet[row_number], 3).value)  # Column C is index 2
     print(f"Values {search_values} not found in Column {column_index}.")
     return (None, None)
 
