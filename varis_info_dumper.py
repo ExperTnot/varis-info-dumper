@@ -122,11 +122,22 @@ def search_excel_and_extract_data(excel_file, search_value):
 
             # Search for "Vater" or "Mutter" in the next rows
             next_row_values = search_next_rows(sheet, row_number + 1, 9, ["Vater", "Mutter"])  # Column I is index 9
-            extracted_data += next_row_values
+                
+            if next_row_values[0]:   
+                extracted_data += next_row_values
 
-            # Debug print after finding "Vater" or "Mutter" in the next rows
-            print(f"Found {Fore.GREEN}{next_row_values[0]}{Style.RESET_ALL} in the next row, Column C: {Fore.GREEN}{next_row_values[1]}{Style.RESET_ALL}")
+                # Debug print after finding "Vater" or "Mutter" in the next rows
+                print(f"Found {Fore.GREEN}{next_row_values[0]}{Style.RESET_ALL} in the next row, Column C: {Fore.GREEN}{next_row_values[1]}{Style.RESET_ALL}")
 
+                # If the first check was successful, check a second time before stopping
+                next_row_values_second_check = search_next_rows(sheet, row_number + 2, 9, ["Vater", "Mutter"])
+                
+                if next_row_values_second_check[0]:
+                    # If the second check is successful, update the extracted data and stop searching
+                    extracted_data += next_row_values_second_check
+
+                    print(f"Found {Fore.GREEN}{next_row_values_second_check[0]}{Style.RESET_ALL} in the subsequent row, Column C: {Fore.GREEN}{next_row_values_second_check[1]}{Style.RESET_ALL}")
+                
             break  # Stop searching after finding the first match
 
     wb.close()
