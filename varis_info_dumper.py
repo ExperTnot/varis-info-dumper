@@ -270,7 +270,7 @@ def main():
             print(f"No matching folders found for '{partial_number}' in Word documents.")
     
         exit_program = False # Flag variable
-    
+        print(f"{Fore.RED}DONT FORGET TO CLOSE THE GUI IF IT IS STILL OPEN!{Style.RESET_ALL}")
         while True: # Ask for next or close
             confirmation = input(f"Do you want to exit the program? {Fore.BLUE}(y/n){Style.RESET_ALL}: ")
             if confirmation.lower() in YES_CHOICES:
@@ -284,7 +284,6 @@ def main():
                 print(f"{Fore.RED}Invalid input.{Style.RESET_ALL}")
         
         if exit_program: # Check the flag
-            print(f"{Fore.RED}DONT FORGET TO CLOSE THE GUI IF IT IS STILL OPEN!{Style.RESET_ALL}")
             break
             
 
