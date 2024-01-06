@@ -12,6 +12,9 @@ from colorama import init, Fore, Style
 CONFIG_FILE_DOCX = "config.txt"
 CONFIG_FILE_XLSX = "config_xlsx.txt"
 
+YES_CHOICES = ['yes', 'y']
+NO_CHOICES = ['no', 'n']
+
 #Threading
 def gui_thread(lines):
     r = Tk()
@@ -266,14 +269,23 @@ def main():
         else:
             print(f"No matching folders found for '{partial_number}' in Word documents.")
     
-        # Ask for next or close
-        confirmation = input(f"Do you want to exit the program? {Fore.BLUE}(y/n){Style.RESET_ALL}: ")
-        print(f"{Fore.RED}DONT FORGET TO CLOSE THE GUI IF IT IS STILL OPEN!{Style.RESET_ALL}")
-        if not (confirmation.lower() == "no" or confirmation.lower() == "n"):
-            print("Exiting the program.")
+        exit_program = False # Flag variable
+    
+        while True: # Ask for next or close
+            confirmation = input(f"Do you want to exit the program? {Fore.BLUE}(y/n){Style.RESET_ALL}: ")
+            if confirmation.lower() in YES_CHOICES:
+                print("Exiting the program.")
+                exit_program = True # Set the flag to True
+                break
+            elif confirmation.lower() in NO_CHOICES:
+                print("------------------------------------------------------------------------")
+                break
+            else:
+                print(f"{Fore.RED}Invalid input.{Style.RESET_ALL}")
+        
+        if exit_program: # Check the flag
+            print(f"{Fore.RED}DONT FORGET TO CLOSE THE GUI IF IT IS STILL OPEN!{Style.RESET_ALL}")
             break
-        elif (confirmation.lower() == "no" or confirmation.lower() == "n"):
-            print("------------------------------------------------------------------------")
             
 
 if __name__ == "__main__":
