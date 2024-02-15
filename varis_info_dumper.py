@@ -266,7 +266,7 @@ def main():
                         window_height = len(lines) * 50
 
                         # Create a separate thread to run the GUI
-                        gui_thread_thread = threading.Thread(target=gui_thread, args=(lines,))
+                        gui_thread_thread = threading.Thread(target=gui_thread, args=(lines,), daemon=True)
                         gui_thread_thread.start()
             
         else:
