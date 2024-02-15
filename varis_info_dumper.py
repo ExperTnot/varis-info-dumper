@@ -15,6 +15,9 @@ CONFIG_FILE_XLSX = "config_xlsx.txt"
 YES_CHOICES = ['yes', 'y']
 NO_CHOICES = ['no', 'n']
 
+COLUMN_INDEX_ID = 4 # Column D is index 4
+COLUMN_INDEX_GENDER = 10 # Column J is index 10
+
 #Threading
 def gui_thread(lines):
     r = Tk()
@@ -100,7 +103,7 @@ def search_next_rows(sheet, start_row, column_index, search_values):
     for row_number in range(start_row, sheet.max_row + 1):
         cell_value = sheet.cell(row=row_number, column=column_index).value
         if cell_value in search_values:
-            return (cell_value, get_cell_value(sheet[row_number], 3).value)  # Column C is index 2
+            return (cell_value, get_cell_value(sheet[row_number], COLUMN_INDEX_ID).value)
     print(f"Values {search_values} not found in Column {column_index}.")
     return (None, None)
 
@@ -110,21 +113,21 @@ def search_excel_and_extract_data(excel_file, search_value):
 
     extracted_data = None
 
-    # Iterate through rows in Column C
+    # Iterate through rows in Column D (ID) to find the search value
     for row_number, row in enumerate(sheet.iter_rows(min_row=2, values_only=True), start=2):
-        cell_value = str(get_cell_value(row, 2))  # Column C is the third column (index 2)
+        cell_value = str(get_cell_value(row, COLUMN_INDEX_ID))
 
         if search_value in cell_value:
-            # Extract data from Column I (if available)
-            column_i_value = get_cell_value(row, 8)  # Column I (index 8)
+            # Extract data from Column J (if available)
+            column_j_value = get_cell_value(row, COLUMN_INDEX_GENDER)
 
-            extracted_data = (cell_value, column_i_value)
+            extracted_data = (cell_value, column_j_value)
 
             # Debug print after finding a matching cell in Column C
-            print(f"Found {Fore.GREEN}{search_value}{Style.RESET_ALL} in cell {Fore.GREEN}{cell_value}{Style.RESET_ALL}, extracted Column I value: {Fore.GREEN}{column_i_value}{Style.RESET_ALL}")
+            print(f"Found {Fore.GREEN}{search_value}{Style.RESET_ALL} in cell {Fore.GREEN}{cell_value}{Style.RESET_ALL}, extracted Column I value: {Fore.GREEN}{column_j_value}{Style.RESET_ALL}")
 
             # Search for "Vater" or "Mutter" in the next rows
-            next_row_values = search_next_rows(sheet, row_number + 1, 9, ["Vater", "Mutter"])  # Column I is index 9
+            next_row_values = search_next_rows(sheet, row_number + 1, COLUMN_INDEX_GENDER, ["Vater", "Mutter"]) 
                 
             if next_row_values[0]:   
                 extracted_data += next_row_values
@@ -133,7 +136,7 @@ def search_excel_and_extract_data(excel_file, search_value):
                 print(f"Found {Fore.GREEN}{next_row_values[0]}{Style.RESET_ALL} in the next row, Column C: {Fore.GREEN}{next_row_values[1]}{Style.RESET_ALL}")
 
                 # If the first check was successful, check a second time before stopping
-                next_row_values_second_check = search_next_rows(sheet, row_number + 2, 9, ["Vater", "Mutter"])
+                next_row_values_second_check = search_next_rows(sheet, row_number + 2, COLUMN_INDEX_GENDER, ["Vater", "Mutter"])
                 
                 if next_row_values_second_check[0]:
                     # If the second check is successful, update the extracted data and stop searching
