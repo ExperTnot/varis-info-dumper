@@ -15,7 +15,7 @@ CONFIG_FILE_XLSX = "config_xlsx.txt"
 YES_CHOICES = ['yes', 'y']
 NO_CHOICES = ['no', 'n']
 
-COLUMN_INDEX_ID = 4 # Column D is index 4
+COLUMN_INDEX_ID = 3 # Column D is index 3
 COLUMN_INDEX_GENDER = 10 # Column J is index 10
 
 #Threading
@@ -119,7 +119,7 @@ def search_excel_and_extract_data(excel_file, search_value):
 
         if search_value in cell_value:
             # Extract data from Column J (if available)
-            column_j_value = get_cell_value(row, COLUMN_INDEX_GENDER)
+            column_j_value = get_cell_value(row, COLUMN_INDEX_GENDER - 1) # -1 because here array -> 0 based index
 
             extracted_data = (cell_value, column_j_value)
 
