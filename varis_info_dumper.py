@@ -192,7 +192,6 @@ def main():
         # Check if the configuration files exist
         folder_path = read_config_file('word')
         excel_file_path = read_config_file('excel')
-        create_logs_folder = False
 
         if not os.path.exists(excel_file_path):
             print(f"Excel file '{excel_file_path}' not found.")
