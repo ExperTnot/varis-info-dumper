@@ -83,6 +83,11 @@ def get_folder_path():
         config_file.write(folder_path)
     return folder_path
 
+# Function to get the logs folder path from the user
+def get_logs_folder_path():
+    logs_folder_path = input("Enter the folder path where you want to save the logs: ")
+    return logs_folder_path
+
 # Function to read the folder path from the configuration file
 def read_folder_path():
     if os.path.exists(CONFIG_FILE_DOCX):
@@ -104,6 +109,8 @@ def search_next_rows(sheet, start_row, column_index, search_values):
         cell_value = sheet.cell(row=row_number, column=column_index).value
         if cell_value in search_values:
             return (cell_value, get_cell_value(sheet[row_number], COLUMN_INDEX_ID).value)
+        else:
+            break
     print(f"Values {search_values} not found in Column {column_index}.")
     return (None, None)
 
@@ -185,6 +192,7 @@ def main():
         # Check if the configuration files exist
         folder_path = read_config_file('word')
         excel_file_path = read_config_file('excel')
+        create_logs_folder = False
 
         if not os.path.exists(excel_file_path):
             print(f"Excel file '{excel_file_path}' not found.")
