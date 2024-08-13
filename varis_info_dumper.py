@@ -8,6 +8,11 @@ import openpyxl
 from tkinter import Tk, Button, Label, Frame
 import threading
 from colorama import init, Fore, Style
+import warnings
+import argparse
+
+# Suppress the specific warning
+warnings.filterwarnings("ignore", category=UserWarning, module="openpyxl")
 
 CONFIG_FILE_DOCX = "config.txt"
 CONFIG_FILE_XLSX = "config_xlsx.txt"
@@ -15,8 +20,10 @@ CONFIG_FILE_XLSX = "config_xlsx.txt"
 YES_CHOICES = ['yes', 'y']
 NO_CHOICES = ['no', 'n']
 
-COLUMN_INDEX_ID = 3 # Column D is index 3
-COLUMN_INDEX_GENDER = 10 # Column J is index 10
+# old hardcoded values
+# COLUMN_INDEX_IX = "C" # Column C
+# COLUMN_INDEX_ID = "D" # Column D
+# COLUMN_INDEX_GENDER = "J" # Column J
 
 #Threading
 def gui_thread(lines):
@@ -114,47 +121,66 @@ def search_next_rows(sheet, start_row, column_index, search_values):
     print(f"Values {search_values} not found in Column {column_index}.")
     return (None, None)
 
-def search_excel_and_extract_data(excel_file, search_value):
-    wb = openpyxl.load_workbook(excel_file)
+import openpyxl
+
+def search_excel_and_extract_data(excel_file, search_value_prefix, columns):
+    # Load the entire Excel file
+    wb = openpyxl.load_workbook(filename=excel_file, read_only=True)
     sheet = wb.active
+    
+    # Store all rows in memory for easier searching
+    try:
+        data_rows = [row for row in sheet.iter_rows(min_row=2, values_only=True)]
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None
+    finally:
+        wb.close()
+    
+    COLUMN_INDEX_IX = columns[0]
+    COLUMN_INDEX_ID = columns[1]
+    COLUMN_INDEX_GENDER = columns[2]
+    
+    extracted_data = []
+    
+    for row in data_rows:
+        index = row[ord(COLUMN_INDEX_IX) - ord('A')]  # Column C (Index)
+        id_value = row[ord(COLUMN_INDEX_ID) - ord('A')]  # Column D (ID)
+        gender = row[ord(COLUMN_INDEX_GENDER) - ord('A')]  # Column G (M/W/Mutter/Vater)
 
-    extracted_data = None
+        # Check if the search value prefix matches the start of id_value in Column D
+        if str(id_value).startswith(str(search_value_prefix)) and gender not in ['Mutter', 'Vater']:
+            extracted_data.append(id_value)
+            extracted_data.append(gender)
+            mutter_id = None
+            vater_id = None
+            parent_count = 0
+            
+            # Search for Mutter and Vater with the same index in all rows
+            for other_row in data_rows:
+                other_index = other_row[ord(COLUMN_INDEX_IX) - ord('A')]  # Column C (Index)
+                other_id_value = other_row[ord(COLUMN_INDEX_ID) - ord('A')]  # Column D (ID)
+                other_gender = other_row[ord(COLUMN_INDEX_GENDER) - ord('A')]  # Column G (M/W/Mutter/Vater)
 
-    # Iterate through rows in Column D (ID) to find the search value
-    for row_number, row in enumerate(sheet.iter_rows(min_row=2, values_only=True), start=2):
-        cell_value = str(get_cell_value(row, COLUMN_INDEX_ID))
+                if other_index == index and other_id_value not in  [id_value, mutter_id, vater_id]:
+                    if 'Mutter' in other_gender and parent_count < 2:
+                        mutter_id = other_id_value
+                        extracted_data.append(mutter_id)
+                        extracted_data.append('Mutter')
+                        parent_count += 1
+                    if 'Vater' in other_gender and parent_count < 2:
+                        vater_id = other_id_value
+                        extracted_data.append(vater_id)
+                        extracted_data.append('Vater')
+                        parent_count += 1
 
-        if search_value in cell_value:
-            # Extract data from Column J (if available)
-            column_j_value = get_cell_value(row, COLUMN_INDEX_GENDER - 1) # -1 because here array -> 0 based index
-
-            extracted_data = (cell_value, column_j_value)
-
-            # Debug print after finding a matching cell in Column C
-            print(f"Found {Fore.GREEN}{search_value}{Style.RESET_ALL} in cell {Fore.GREEN}{cell_value}{Style.RESET_ALL}, extracted Column I value: {Fore.GREEN}{column_j_value}{Style.RESET_ALL}")
-
-            # Search for "Vater" or "Mutter" in the next rows
-            next_row_values = search_next_rows(sheet, row_number + 1, COLUMN_INDEX_GENDER, ["Vater", "Mutter"]) 
-                
-            if next_row_values[0]:   
-                extracted_data += next_row_values
-
-                # Debug print after finding "Vater" or "Mutter" in the next rows
-                print(f"Found {Fore.GREEN}{next_row_values[0]}{Style.RESET_ALL} in the next row, Column C: {Fore.GREEN}{next_row_values[1]}{Style.RESET_ALL}")
-
-                # If the first check was successful, check a second time before stopping
-                next_row_values_second_check = search_next_rows(sheet, row_number + 2, COLUMN_INDEX_GENDER, ["Vater", "Mutter"])
-                
-                if next_row_values_second_check[0]:
-                    # If the second check is successful, update the extracted data and stop searching
-                    extracted_data += next_row_values_second_check
-
-                    print(f"Found {Fore.GREEN}{next_row_values_second_check[0]}{Style.RESET_ALL} in the subsequent row, Column C: {Fore.GREEN}{next_row_values_second_check[1]}{Style.RESET_ALL}")
-                
-            break  # Stop searching after finding the first match
-
-    wb.close()
+                if parent_count >= 2:
+                    break  # Stop after finding the first match
+    
+        if extracted_data:
+            break # Stop after finding the first match
     return extracted_data
+
 
 # Function to get the Excel file path from the user and save it to the configuration file
 def get_excel_file_path():
@@ -187,6 +213,21 @@ def read_config_file(file_type):
     return file_path
 
 def main():
+    parser = argparse.ArgumentParser(description="Easly extract data from Word documents and Excel sheets for Varvis.")
+    parser.add_argument('-i', '--index', type=str, help='Spalte der Indexnummer in der Excel-Tabelle.')
+    parser.add_argument('-p', '--probe', type=str, help='Spalte der Probennummer in der Excel-Tabelle.')
+    parser.add_argument('-g', '--gender', type=str, help='Spalte des Geschlechts in der Excel-Tabelle.')
+    args = parser.parse_args()
+
+    if not args.index or not args.probe or not args.gender:
+        print("Error: You must specify index, probe and gender with -i, -p and -g.\nSee -h for more information.")
+        return
+
+    index = args.index.upper()
+    probe = args.probe.upper()
+    gender = args.gender.upper()
+    columns = (index, probe, gender)   
+        
     init() # Initialize colorama
     while True:
         # Check if the configuration files exist
@@ -246,14 +287,18 @@ def main():
             search_value = partial_number #input("Enter a 4-digit number to search for in the Excel sheet: ")
 
             # Search the Excel sheet and extract data
-            extracted_data = search_excel_and_extract_data(excel_file_path, search_value)
+            extracted_data = search_excel_and_extract_data(excel_file_path, search_value, columns)
 
             if extracted_data is None:
                 print(f"No data found for '{search_value}' in the Excel sheet.")
                 return
 
             # Display the extracted data
-            cell_value = extracted_data[0] if extracted_data is not None else None
+            try:
+                cell_value = extracted_data[0]
+            except Exception as e:
+                print(f"An error occurred: {e}")
+                cell_value = None
 
             if cell_value is not None:
                 print(f"Cell Value: {Fore.GREEN}{cell_value}{Style.RESET_ALL}")
