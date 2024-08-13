@@ -35,7 +35,6 @@ def gui_thread(lines):
         r.update()
 
     def close_window():
-        r.quit()
         r.destroy()
     
     background_colors = ["white", "lightgrey", "darkgrey"]  # Define background colors
