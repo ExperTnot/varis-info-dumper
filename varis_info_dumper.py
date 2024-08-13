@@ -121,8 +121,6 @@ def search_next_rows(sheet, start_row, column_index, search_values):
     print(f"Values {search_values} not found in Column {column_index}.")
     return (None, None)
 
-import openpyxl
-
 def search_excel_and_extract_data(excel_file, search_value_prefix, columns):
     # Load the entire Excel file
     wb = openpyxl.load_workbook(filename=excel_file, read_only=True)
