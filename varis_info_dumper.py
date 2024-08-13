@@ -2,7 +2,6 @@ import os
 import re
 import time
 import sys
-import re
 from docx import Document
 import openpyxl
 from tkinter import Tk, Button, Label, Frame
