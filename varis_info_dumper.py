@@ -172,10 +172,10 @@ def search_excel_and_extract_data(excel_file, search_value_prefix, columns):
                         parent_count += 1
 
                 if parent_count >= 2:
-                    break  # Stop after finding the first match
+                    break  # Max two parents
     
         if extracted_data:
-            break # Stop after finding the first match
+            break # Only one id+w/m match
     return extracted_data
 
 
